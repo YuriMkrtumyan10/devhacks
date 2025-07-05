@@ -1,164 +1,489 @@
-import React, { useEffect, useState } from 'react';
-import { companyApi } from '../services/api';
-import CompanyForm from './CompanyForm';
-import CompanyList from './CompanyList';
-import { useTenant } from './TenantContext';
+import React, { useState, useEffect } from "react";
+import { companyApi } from "../services/api";
+import { useAuth } from "../context/AuthContext";
+import { useTenant } from "./TenantContext";
 
-export default function Company({ user }) {
-  const { tenant } = useTenant();
+export default function Company() {
+  const { user } = useAuth();
+  const { refreshTenants } = useTenant();
   const [companies, setCompanies] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingCompany, setEditingCompany] = useState(null);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-
-  // Only admin can see all companies and switch tenants
-  const isAdmin = user?.role === 'admin';
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCompany, setSelectedCompany] = useState(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [newCompany, setNewCompany] = useState({
+    name: "",
+    industry: "",
+    country: "",
+    city: "",
+    website: "",
+    contact_email: "",
+    phone: "",
+    tagline: "",
+    founded_year: new Date().getFullYear(),
+    size: "1-10",
+  });
 
   useEffect(() => {
-    loadCompanies();
-  }, [tenant.id, isAdmin]);
+    fetchCompanies();
+  }, []);
 
-  const loadCompanies = async () => {
-    setIsLoading(true);
-    setError('');
+  const fetchCompanies = async () => {
+    setLoading(true);
+    setError("");
     try {
-      let data;
-      if (isAdmin) {
-        data = await companyApi.getCompanies(); // all companies
-      } else {
-        // company owner: only see their own company (simulate by filtering)
-        data = await companyApi.getCompanies();
-        data = data.filter(c => c.id === tenant.id);
-      }
+      const data = await companyApi.getCompanies();
       setCompanies(data);
     } catch (err) {
       setError(err.message);
+      setCompanies([]);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const handleAddCompany = () => {
-    setEditingCompany(null);
-    setIsFormOpen(true);
-    setError('');
-    setSuccess('');
-  };
-
-  const handleEditCompany = (company) => {
-    setEditingCompany(company);
-    setIsFormOpen(true);
-    setError('');
-    setSuccess('');
-  };
-
-  const handleSaveCompany = async (companyData) => {
-    setIsLoading(true);
-    setError('');
-    setSuccess('');
-
+  const handleCreateCompany = async (e) => {
+    e.preventDefault();
+    setLoading(true);
     try {
-      if (editingCompany) {
-        // Update existing company
-        await companyApi.updateCompany(editingCompany.id, companyData);
-        setSuccess('Company updated successfully!');
-      } else {
-        // Create new company
-        await companyApi.createCompany(companyData);
-        setSuccess('Company created successfully!');
-      }
-
-      setIsFormOpen(false);
-      setEditingCompany(null);
-      await loadCompanies();
+      await companyApi.createCompany(newCompany);
+      setIsCreateModalOpen(false);
+      setNewCompany({
+        name: "",
+        industry: "",
+        country: "",
+        city: "",
+        website: "",
+        contact_email: "",
+        phone: "",
+        tagline: "",
+        founded_year: new Date().getFullYear(),
+        size: "1-10",
+      });
+      await fetchCompanies();
+      await refreshTenants();
     } catch (err) {
       setError(err.message);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   const handleDeleteCompany = async (companyId) => {
-    if (window.confirm('Are you sure you want to delete this company?')) {
-      setIsLoading(true);
-      setError('');
-      setSuccess('');
+    if (!window.confirm("Are you sure you want to delete this company?"))
+      return;
 
-      try {
-        await companyApi.deleteCompany(companyId);
-        setSuccess('Company deleted successfully!');
-        await loadCompanies();
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
-      }
+    try {
+      await companyApi.deleteCompany(companyId);
+      await fetchCompanies();
+      await refreshTenants();
+    } catch (err) {
+      setError(err.message);
     }
   };
 
-  const handleCloseForm = () => {
-    setIsFormOpen(false);
-    setEditingCompany(null);
-    setError('');
-  };
+  const filteredCompanies = companies.filter(
+    (company) =>
+      company.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (company.industry || "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      (company.country || "").toLowerCase().includes(searchTerm.toLowerCase()),
+  );
 
-  // Clear messages after 3 seconds
-  useEffect(() => {
-    if (error || success) {
-      const timer = setTimeout(() => {
-        setError('');
-        setSuccess('');
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [error, success]);
+  if (loading && companies.length === 0) {
+    return (
+      <div className="cosmic-loading">
+        <div className="cosmic-spinner-large"></div>
+        <h2>Loading companies...</h2>
+        <p>Fetching data from the cosmic database</p>
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <div className="page-header" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-        <h2>Company Management</h2>
-        <span style={{ color: '#888', fontSize: 15 }}>
-          <b>Tenant:</b> {tenant.name}
-        </span>
-        {isAdmin && <span style={{ color: '#3498db', fontWeight: 600 }}>(Admin Mode: can manage all companies)</span>}
+    <div className="cosmic-companies">
+      <div className="companies-header">
+        <div className="header-content">
+          <h1>🏢 Company Management</h1>
+          <p>Manage and oversee all companies in the cosmic network</p>
+        </div>
+
+        <div className="header-actions">
+          <div className="cosmic-search-bar">
+            <svg
+              className="search-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="21 21l-4.35-4.35"></path>
+            </svg>
+            <input
+              type="text"
+              placeholder="Search companies, industries, countries..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input"
+            />
+          </div>
+
+          <button
+            className="cosmic-btn primary"
+            onClick={() => setIsCreateModalOpen(true)}
+          >
+            <span className="btn-icon">✨</span>
+            Add Company
+          </button>
+        </div>
       </div>
 
-      {error && <div className="error">{error}</div>}
-      {success && <div className="success">{success}</div>}
+      {error && (
+        <div className="cosmic-alert error">
+          <span className="alert-icon">⚠️</span>
+          <div className="alert-content">
+            <h4>Error</h4>
+            <p>{error}</p>
+          </div>
+        </div>
+      )}
 
-      <button
-        className="add-company-btn"
-        onClick={handleAddCompany}
-        disabled={isLoading || (!isAdmin && companies.length > 0)}
-        title={isAdmin ? '' : 'Only one company allowed per owner'}
-        style={{ boxShadow: '0 4px 16px #5f6fff22', fontSize: '1.08rem', letterSpacing: '.01em', marginBottom: 18, marginTop: 8 }}
-      >
-        <span style={{ fontSize: 20, marginRight: 8, verticalAlign: 'middle' }}>＋</span> Add New Company
-      </button>
+      <div className="companies-stats">
+        <div className="stat-card">
+          <div className="stat-icon">🏢</div>
+          <div className="stat-info">
+            <h3>{companies.length}</h3>
+            <p>Total Companies</p>
+          </div>
+        </div>
 
-      <CompanyList
-        companies={companies}
-        onEdit={handleEditCompany}
-        onDelete={handleDeleteCompany}
-        isLoading={isLoading}
-      />
+        <div className="stat-card">
+          <div className="stat-icon">🌍</div>
+          <div className="stat-info">
+            <h3>
+              {new Set(companies.map((c) => c.country).filter(Boolean)).size}
+            </h3>
+            <p>Countries</p>
+          </div>
+        </div>
 
-      {isFormOpen && (
-        <CompanyForm
-          company={editingCompany}
-          onSave={handleSaveCompany}
-          onCancel={handleCloseForm}
-          isLoading={isLoading}
-        />
+        <div className="stat-card">
+          <div className="stat-icon">🏭</div>
+          <div className="stat-info">
+            <h3>
+              {new Set(companies.map((c) => c.industry).filter(Boolean)).size}
+            </h3>
+            <p>Industries</p>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-icon">📈</div>
+          <div className="stat-info">
+            <h3>
+              {
+                companies.filter(
+                  (c) =>
+                    new Date(c.created_at) >
+                    new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+                ).length
+              }
+            </h3>
+            <p>New This Month</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="companies-grid">
+        {filteredCompanies.map((company) => (
+          <div key={company.id} className="company-card">
+            <div className="company-header">
+              <div className="company-avatar">
+                {company.logo ? (
+                  <img src={company.logo} alt={company.name} />
+                ) : (
+                  <div className="company-initial">
+                    {company.name.charAt(0)}
+                  </div>
+                )}
+              </div>
+              <div className="company-info">
+                <h3 className="company-name">{company.name}</h3>
+                <p className="company-tagline">
+                  {company.tagline || "Building the future"}
+                </p>
+              </div>
+              <div className="company-actions">
+                <button
+                  className="action-btn edit"
+                  onClick={() => setSelectedCompany(company)}
+                  title="Edit Company"
+                >
+                  ✏️
+                </button>
+                <button
+                  className="action-btn delete"
+                  onClick={() => handleDeleteCompany(company.id)}
+                  title="Delete Company"
+                >
+                  🗑️
+                </button>
+              </div>
+            </div>
+
+            <div className="company-details">
+              <div className="detail-row">
+                <span className="detail-label">Industry:</span>
+                <span className="detail-value">
+                  {company.industry || "Not specified"}
+                </span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Location:</span>
+                <span className="detail-value">
+                  {company.city
+                    ? `${company.city}, ${company.country}`
+                    : company.country || "Not specified"}
+                </span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Founded:</span>
+                <span className="detail-value">
+                  {company.founded_year || "Unknown"}
+                </span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Size:</span>
+                <span className="detail-value">
+                  {company.size || "Not specified"}
+                </span>
+              </div>
+            </div>
+
+            {company.website && (
+              <div className="company-footer">
+                <a
+                  href={company.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="website-link"
+                >
+                  🌐 Visit Website
+                </a>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {filteredCompanies.length === 0 && !loading && (
+        <div className="cosmic-empty-state">
+          <div className="empty-icon">🔍</div>
+          <h3>No companies found</h3>
+          <p>
+            {searchTerm
+              ? `No companies match "${searchTerm}". Try adjusting your search.`
+              : "No companies have been added yet. Create your first company to get started."}
+          </p>
+          {!searchTerm && (
+            <button
+              className="cosmic-btn primary"
+              onClick={() => setIsCreateModalOpen(true)}
+            >
+              <span className="btn-icon">✨</span>
+              Create First Company
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Create Company Modal */}
+      {isCreateModalOpen && (
+        <div className="cosmic-modal">
+          <div
+            className="modal-backdrop"
+            onClick={() => setIsCreateModalOpen(false)}
+          ></div>
+          <div className="modal-content">
+            <div className="modal-header">
+              <h2>✨ Create New Company</h2>
+              <button
+                className="close-btn"
+                onClick={() => setIsCreateModalOpen(false)}
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateCompany} className="company-form">
+              <div className="form-grid">
+                <div className="form-group">
+                  <label htmlFor="name">Company Name *</label>
+                  <input
+                    id="name"
+                    type="text"
+                    value={newCompany.name}
+                    onChange={(e) =>
+                      setNewCompany({ ...newCompany, name: e.target.value })
+                    }
+                    required
+                    placeholder="Enter company name"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="industry">Industry</label>
+                  <select
+                    id="industry"
+                    value={newCompany.industry}
+                    onChange={(e) =>
+                      setNewCompany({ ...newCompany, industry: e.target.value })
+                    }
+                  >
+                    <option value="">Select industry</option>
+                    <option value="Technology">Technology</option>
+                    <option value="Healthcare">Healthcare</option>
+                    <option value="Finance">Finance</option>
+                    <option value="E-commerce">E-commerce</option>
+                    <option value="Manufacturing">Manufacturing</option>
+                    <option value="Education">Education</option>
+                    <option value="Real Estate">Real Estate</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="country">Country</label>
+                  <input
+                    id="country"
+                    type="text"
+                    value={newCompany.country}
+                    onChange={(e) =>
+                      setNewCompany({ ...newCompany, country: e.target.value })
+                    }
+                    placeholder="e.g., United States"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="city">City</label>
+                  <input
+                    id="city"
+                    type="text"
+                    value={newCompany.city}
+                    onChange={(e) =>
+                      setNewCompany({ ...newCompany, city: e.target.value })
+                    }
+                    placeholder="e.g., San Francisco"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="website">Website</label>
+                  <input
+                    id="website"
+                    type="url"
+                    value={newCompany.website}
+                    onChange={(e) =>
+                      setNewCompany({ ...newCompany, website: e.target.value })
+                    }
+                    placeholder="https://example.com"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="contact_email">Contact Email</label>
+                  <input
+                    id="contact_email"
+                    type="email"
+                    value={newCompany.contact_email}
+                    onChange={(e) =>
+                      setNewCompany({
+                        ...newCompany,
+                        contact_email: e.target.value,
+                      })
+                    }
+                    placeholder="contact@company.com"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="phone">Phone</label>
+                  <input
+                    id="phone"
+                    type="tel"
+                    value={newCompany.phone}
+                    onChange={(e) =>
+                      setNewCompany({ ...newCompany, phone: e.target.value })
+                    }
+                    placeholder="+1 (555) 123-4567"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="size">Company Size</label>
+                  <select
+                    id="size"
+                    value={newCompany.size}
+                    onChange={(e) =>
+                      setNewCompany({ ...newCompany, size: e.target.value })
+                    }
+                  >
+                    <option value="1-10">1-10 employees</option>
+                    <option value="11-50">11-50 employees</option>
+                    <option value="51-200">51-200 employees</option>
+                    <option value="201-500">201-500 employees</option>
+                    <option value="501-1000">501-1000 employees</option>
+                    <option value="1000+">1000+ employees</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-group full-width">
+                <label htmlFor="tagline">Tagline</label>
+                <input
+                  id="tagline"
+                  type="text"
+                  value={newCompany.tagline}
+                  onChange={(e) =>
+                    setNewCompany({ ...newCompany, tagline: e.target.value })
+                  }
+                  placeholder="A brief description of what the company does"
+                />
+              </div>
+
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  className="cosmic-btn secondary"
+                  onClick={() => setIsCreateModalOpen(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="cosmic-btn primary"
+                  disabled={loading || !newCompany.name.trim()}
+                >
+                  {loading ? (
+                    <>
+                      <div className="cosmic-spinner"></div>
+                      Creating...
+                    </>
+                  ) : (
+                    <>
+                      <span className="btn-icon">✨</span>
+                      Create Company
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );
 }
-
-// --- LOGIN INFO FOR DEMO ---
-// To log in as a company owner and see the dashboard, use:
-// Email: owner@acme.com   Password: any
-// Email: owner@globex.com Password: any
-// Only these emails will work for demo login.

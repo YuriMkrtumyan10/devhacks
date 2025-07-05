@@ -1,0 +1,573 @@
+/* Responsive UI System - Senior Level Coverage */
+
+/* Fluid Typography Scale */
+:root {
+  /* Base font sizes with fluid scaling */
+  --font-xs: clamp(0.75rem, 0.7rem + 0.2vw, 0.875rem);
+  --font-sm: clamp(0.875rem, 0.8rem + 0.3vw, 1rem);
+  --font-base: clamp(1rem, 0.9rem + 0.4vw, 1.125rem);
+  --font-lg: clamp(1.125rem, 1rem + 0.5vw, 1.25rem);
+  --font-xl: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
+  --font-2xl: clamp(1.5rem, 1.3rem + 0.8vw, 2rem);
+  --font-3xl: clamp(1.875rem, 1.6rem + 1vw, 2.5rem);
+  --font-4xl: clamp(2.25rem, 1.9rem + 1.4vw, 3rem);
+
+  /* Fluid spacing scale */
+  --space-xs: clamp(0.25rem, 0.2rem + 0.2vw, 0.375rem);
+  --space-sm: clamp(0.5rem, 0.4rem + 0.3vw, 0.75rem);
+  --space-md: clamp(0.75rem, 0.6rem + 0.5vw, 1rem);
+  --space-lg: clamp(1rem, 0.8rem + 0.8vw, 1.5rem);
+  --space-xl: clamp(1.5rem, 1.2rem + 1.2vw, 2.25rem);
+  --space-2xl: clamp(2rem, 1.6rem + 1.6vw, 3rem);
+  --space-3xl: clamp(2.5rem, 2rem + 2vw, 4rem);
+
+  /* Container sizes */
+  --container-xs: 20rem;
+  --container-sm: 24rem;
+  --container-md: 28rem;
+  --container-lg: 32rem;
+  --container-xl: 36rem;
+  --container-2xl: 42rem;
+  --container-full: 100%;
+
+  /* Responsive breakpoints */
+  --bp-sm: 640px;
+  --bp-md: 768px;
+  --bp-lg: 1024px;
+  --bp-xl: 1280px;
+  --bp-2xl: 1536px;
+}
+
+/* Base Typography Classes */
+.text-xs {
+  font-size: var(--font-xs);
+}
+.text-sm {
+  font-size: var(--font-sm);
+}
+.text-base {
+  font-size: var(--font-base);
+}
+.text-lg {
+  font-size: var(--font-lg);
+}
+.text-xl {
+  font-size: var(--font-xl);
+}
+.text-2xl {
+  font-size: var(--font-2xl);
+}
+.text-3xl {
+  font-size: var(--font-3xl);
+}
+.text-4xl {
+  font-size: var(--font-4xl);
+}
+
+/* Font weights */
+.font-light {
+  font-weight: 300;
+}
+.font-normal {
+  font-weight: 400;
+}
+.font-medium {
+  font-weight: 500;
+}
+.font-semibold {
+  font-weight: 600;
+}
+.font-bold {
+  font-weight: 700;
+}
+.font-extrabold {
+  font-weight: 800;
+}
+
+/* Line heights */
+.leading-none {
+  line-height: 1;
+}
+.leading-tight {
+  line-height: 1.25;
+}
+.leading-snug {
+  line-height: 1.375;
+}
+.leading-normal {
+  line-height: 1.5;
+}
+.leading-relaxed {
+  line-height: 1.625;
+}
+.leading-loose {
+  line-height: 2;
+}
+
+/* Spacing utilities */
+.p-xs {
+  padding: var(--space-xs);
+}
+.p-sm {
+  padding: var(--space-sm);
+}
+.p-md {
+  padding: var(--space-md);
+}
+.p-lg {
+  padding: var(--space-lg);
+}
+.p-xl {
+  padding: var(--space-xl);
+}
+.p-2xl {
+  padding: var(--space-2xl);
+}
+.p-3xl {
+  padding: var(--space-3xl);
+}
+
+.m-xs {
+  margin: var(--space-xs);
+}
+.m-sm {
+  margin: var(--space-sm);
+}
+.m-md {
+  margin: var(--space-md);
+}
+.m-lg {
+  margin: var(--space-lg);
+}
+.m-xl {
+  margin: var(--space-xl);
+}
+.m-2xl {
+  margin: var(--space-2xl);
+}
+.m-3xl {
+  margin: var(--space-3xl);
+}
+
+/* Responsive grid system */
+.grid-cols-1 {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+.grid-cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.grid-cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.grid-cols-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.grid-cols-5 {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+.grid-cols-6 {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+.grid-cols-12 {
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+}
+
+/* Auto-fit responsive grids */
+.grid-auto-sm {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+.grid-auto-md {
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+.grid-auto-lg {
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+}
+
+/* Container classes */
+.container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--space-lg);
+  padding-right: var(--space-lg);
+}
+
+@media (min-width: 640px) {
+  .container {
+    max-width: 640px;
+  }
+  .sm\:text-sm {
+    font-size: var(--font-sm);
+  }
+  .sm\:text-base {
+    font-size: var(--font-base);
+  }
+  .sm\:text-lg {
+    font-size: var(--font-lg);
+  }
+  .sm\:text-xl {
+    font-size: var(--font-xl);
+  }
+  .sm\:text-2xl {
+    font-size: var(--font-2xl);
+  }
+  .sm\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .sm\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .sm\:grid-cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 768px;
+  }
+  .md\:text-base {
+    font-size: var(--font-base);
+  }
+  .md\:text-lg {
+    font-size: var(--font-lg);
+  }
+  .md\:text-xl {
+    font-size: var(--font-xl);
+  }
+  .md\:text-2xl {
+    font-size: var(--font-2xl);
+  }
+  .md\:text-3xl {
+    font-size: var(--font-3xl);
+  }
+  .md\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .md\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .md\:grid-cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .md\:grid-cols-6 {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    max-width: 1024px;
+  }
+  .lg\:text-lg {
+    font-size: var(--font-lg);
+  }
+  .lg\:text-xl {
+    font-size: var(--font-xl);
+  }
+  .lg\:text-2xl {
+    font-size: var(--font-2xl);
+  }
+  .lg\:text-3xl {
+    font-size: var(--font-3xl);
+  }
+  .lg\:text-4xl {
+    font-size: var(--font-4xl);
+  }
+  .lg\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .lg\:grid-cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .lg\:grid-cols-5 {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  .lg\:grid-cols-6 {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1280px;
+  }
+  .xl\:text-xl {
+    font-size: var(--font-xl);
+  }
+  .xl\:text-2xl {
+    font-size: var(--font-2xl);
+  }
+  .xl\:text-3xl {
+    font-size: var(--font-3xl);
+  }
+  .xl\:text-4xl {
+    font-size: var(--font-4xl);
+  }
+  .xl\:grid-cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .xl\:grid-cols-5 {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  .xl\:grid-cols-6 {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1536px) {
+  .container {
+    max-width: 1536px;
+  }
+  .container-full {
+    max-width: 100%;
+  }
+}
+
+/* Component-specific responsive styles */
+.tenant-switcher-loading,
+.tenant-switcher-empty {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  backdrop-filter: blur(20px);
+  color: var(--text-light);
+  font-size: var(--font-sm);
+  min-width: 200px;
+}
+
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(0, 212, 255, 0.2);
+  border-top: 2px solid var(--primary);
+  border-radius: 50%;
+  animation: cosmicSpin 1s linear infinite;
+}
+
+/* Improved button spacing and typography */
+.cosmic-btn {
+  font-size: var(--font-sm);
+  padding: var(--space-md) var(--space-lg);
+  gap: var(--space-sm);
+}
+
+@media (min-width: 768px) {
+  .cosmic-btn {
+    font-size: var(--font-base);
+    padding: var(--space-lg) var(--space-xl);
+  }
+}
+
+/* Enhanced form elements */
+.form-group label {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  margin-bottom: var(--space-xs);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  font-size: var(--font-base);
+  padding: var(--space-md) var(--space-lg);
+}
+
+/* Card components responsive improvements */
+.kpi-card {
+  padding: var(--space-lg) var(--space-xl);
+  gap: var(--space-lg);
+}
+
+.kpi-card .kpi-content h3 {
+  font-size: var(--font-xs);
+  margin-bottom: var(--space-xs);
+}
+
+.kpi-card .kpi-value {
+  font-size: var(--font-2xl);
+  margin-bottom: var(--space-xs);
+}
+
+.kpi-card .kpi-change {
+  font-size: var(--font-sm);
+}
+
+@media (min-width: 768px) {
+  .kpi-card {
+    padding: var(--space-xl) var(--space-2xl);
+  }
+
+  .kpi-card .kpi-value {
+    font-size: var(--font-3xl);
+  }
+}
+
+/* Chart card improvements */
+.chart-card {
+  padding: var(--space-lg) var(--space-xl);
+}
+
+.chart-header h3 {
+  font-size: var(--font-lg);
+  margin-bottom: var(--space-xs);
+}
+
+.chart-header p {
+  font-size: var(--font-sm);
+}
+
+@media (min-width: 768px) {
+  .chart-card {
+    padding: var(--space-xl) var(--space-2xl);
+  }
+
+  .chart-header h3 {
+    font-size: var(--font-xl);
+  }
+}
+
+/* Navigation improvements */
+.modern-header {
+  padding: var(--space-lg) 0;
+}
+
+.header-container {
+  padding: 0 var(--space-lg);
+  gap: var(--space-lg);
+}
+
+.brand-info h1 {
+  font-size: var(--font-xl);
+}
+
+.brand-info p {
+  font-size: var(--font-sm);
+}
+
+@media (min-width: 768px) {
+  .header-container {
+    padding: 0 var(--space-xl);
+    gap: var(--space-xl);
+  }
+
+  .brand-info h1 {
+    font-size: var(--font-2xl);
+  }
+}
+
+/* Tenant switcher improvements */
+.tenant-trigger {
+  padding: var(--space-md) var(--space-lg);
+  gap: var(--space-md);
+  min-width: 200px;
+}
+
+.tenant-name {
+  font-size: var(--font-sm);
+  font-weight: 600;
+}
+
+.tenant-meta {
+  font-size: var(--font-xs);
+}
+
+@media (min-width: 768px) {
+  .tenant-trigger {
+    min-width: 240px;
+    padding: var(--space-lg) var(--space-xl);
+  }
+
+  .tenant-name {
+    font-size: var(--font-base);
+  }
+
+  .tenant-meta {
+    font-size: var(--font-sm);
+  }
+}
+
+/* Dashboard grid improvements */
+.dashboard-grid {
+  gap: var(--space-lg);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .dashboard-grid {
+    gap: var(--space-xl);
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .dashboard-grid {
+    gap: var(--space-2xl);
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  }
+}
+
+/* Companies grid responsive */
+.companies-grid {
+  gap: var(--space-lg);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .companies-grid {
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .companies-grid {
+    gap: var(--space-xl);
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  }
+}
+
+/* Enhanced focus states for accessibility */
+.tenant-trigger:focus,
+.cosmic-btn:focus,
+.form-group input:focus,
+.form-group select:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Touch targets for mobile */
+@media (max-width: 767px) {
+  .cosmic-btn,
+  .tenant-trigger,
+  .action-btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .nav-item {
+    min-height: 44px;
+    padding: var(--space-md) var(--space-lg);
+  }
+}
+
+/* Print styles */
+@media print {
+  .modern-header,
+  .cosmic-btn,
+  .tenant-switcher,
+  .action-btn {
+    display: none !important;
+  }
+
+  .chart-card,
+  .kpi-card {
+    break-inside: avoid;
+    border: 1px solid #000;
+    background: white !important;
+    color: black !important;
+  }
+}

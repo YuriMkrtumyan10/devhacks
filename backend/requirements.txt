@@ -6,3 +6,6 @@ alembic==1.16.2            # 16 Jun 2025 :contentReference[oaicite:4]{index=4}
 pydantic==2.11.7           # 14 Jun 2025 :contentReference[oaicite:5]{index=5}
 python-multipart==0.0.20   # 16 Dec 2024 :contentReference[oaicite:6]{index=6}
 python-dotenv==1.1.1       # 24 Jun 2025 :contentReference[oaicite:7]{index=7}
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart

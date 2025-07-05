@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Link,
   Navigate,
@@ -6,78 +6,121 @@ import {
   BrowserRouter as Router,
   Routes,
   useLocation,
-} from 'react-router-dom';
+} from "react-router-dom";
 
-import Chat from './components/Chat';
-import Company from './components/Company';
-import CompanySettings from './components/CompanySettings';
-import Dashboard from './components/Dashboard';
-import Login from './components/Login';
-import Products from './components/Products';
-import { TenantProvider } from './components/TenantContext';
-import TenantSwitcher from './components/TenantSwitcher';
+import Chat from "./components/Chat";
+import Company from "./components/CompanyOptimized";
+import CompanySettings from "./components/CompanySettings";
+import AdminDashboard from "./components/AdminDashboard";
+import OwnerDashboard from "./components/OwnerDashboard";
+import AuthLayout from "./components/AuthLayout";
+import Products from "./components/Products";
+import Navigation from "./components/Navigation";
+import { TenantProvider } from "./components/TenantContext";
+import TenantSwitcher from "./components/TenantSwitcher";
+import TenantAnalytics from "./components/TenantAnalytics";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 
-function Navigation() {
-  const { pathname } = useLocation();
+function DashboardRouter() {
+  const { user } = useAuth();
 
-  const link = (to, label) => (
-    <Link to={to} className={pathname === to ? 'active' : ''}>
-      {label}
-    </Link>
-  );
+  if (user?.role === "admin") {
+    return <AdminDashboard />;
+  }
 
-  return (
-    <nav className="navigation">
-      <div className="nav-links">
-        {link('/dashboard', 'Dashboard')}
-        {/* {link('/companies', 'Company Mgmt')} */}
-        {link('/company', 'Company Settings')}
-        {link('/products', 'Products')}
-        {/* {link('/chat', 'Chat Room')} */}
-      </div>
-    </nav>
-  );
+  return <OwnerDashboard />;
 }
 
-export default function App() {
-  const [user, setUser] = React.useState(null);
+function AppContent() {
+  const { user, logout, loading } = useAuth();
 
   // Only show tenant switcher for admin
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role === "admin";
+
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   if (!user) {
-    return <Login onLogin={setUser} />;
+    return <AuthLayout />;
   }
 
   return (
     <TenantProvider>
       <Router>
-        <header className="header">
-          <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              <h1 style={{ margin: 0 }}>Admin Panel</h1>
-              {isAdmin && <TenantSwitcher />}
+        <header className="modern-header">
+          <div className="header-container">
+            <div className="header-brand">
+              <div className="brand-logo">🚀</div>
+              <div className="brand-info">
+                <h1>{user?.role === "admin" ? "Admin Panel" : "Dashboard"}</h1>
+                <p>
+                  {user?.role === "admin"
+                    ? "Manage all companies"
+                    : "Your business insights"}
+                </p>
+              </div>
             </div>
+
             <Navigation />
-            <div style={{ fontSize: 14, color: '#888' }}>
-              {user.email} (<span style={{ color: '#3498db' }}>{user.role}</span>)
-              <button style={{ marginLeft: 12, background: '#f5f6fa', color: '#888', border: '1.5px solid #e2e6ed', borderRadius: 8, fontWeight: 600, padding: '0.5rem 1.1rem', boxShadow: 'none', transition: 'background .18s' }} onClick={() => setUser(null)} onMouseOver={e => e.currentTarget.style.background='#e2e6ed'} onMouseOut={e => e.currentTarget.style.background='#f5f6fa'}>
-                Logout
-              </button>
+
+            <div className="header-actions">
+              {isAdmin && <TenantSwitcher />}
+              <div className="user-menu">
+                <div className="user-avatar">
+                  {user.email.charAt(0).toUpperCase()}
+                </div>
+                <div className="user-details">
+                  <span className="user-name">{user.email}</span>
+                  <span className="user-role">{user.role}</span>
+                </div>
+                <button className="logout-btn" onClick={logout}>
+                  Logout
+                </button>
+              </div>
             </div>
           </div>
         </header>
-        <main className="container">
+        <main className="main-content">
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/dashboard" element={<DashboardRouter />} />
             <Route path="/companies" element={<Company user={user} />} />
-            <Route path="/company" element={<CompanySettings companyId={user.companyId} />} />
+            <Route
+              path="/company"
+              element={<CompanySettings companyId={user.companyId} />}
+            />
             <Route path="/products" element={<Products />} />
             <Route path="/chat" element={<Chat />} />
+            <Route path="/analytics" element={<TenantAnalytics />} />
+            <Route
+              path="/users"
+              element={<div>Users Management (Coming Soon)</div>}
+            />
+            <Route
+              path="/orders"
+              element={<div>Orders Management (Coming Soon)</div>}
+            />
+            <Route
+              path="/team"
+              element={<div>Team Management (Coming Soon)</div>}
+            />
           </Routes>
         </main>
       </Router>
     </TenantProvider>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }

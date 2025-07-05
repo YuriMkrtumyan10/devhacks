@@ -1,9 +1,27 @@
-import React, { useEffect, useState } from 'react';
-import { Bar, BarChart, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { companyApi } from '../services/api';
-import { useTenant } from './TenantContext';
+import React, { useEffect, useState } from "react";
+import {
+  Bar,
+  BarChart,
+  Cell,
+  Legend,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { companyApi } from "../services/api";
+import { useTenant } from "./TenantContext";
 
-const COLORS = ['#5f6fff', '#27ae60', '#e67e22', '#e74c3c', '#aab6ff', '#3b3bff'];
+const COLORS = [
+  "#5f6fff",
+  "#27ae60",
+  "#e67e22",
+  "#e74c3c",
+  "#aab6ff",
+  "#3b3bff",
+];
 
 export default function Dashboard() {
   const { tenant } = useTenant();
@@ -31,7 +49,7 @@ export default function Dashboard() {
       if (!c.industry) return acc;
       acc[c.industry] = (acc[c.industry] || 0) + 1;
       return acc;
-    }, {})
+    }, {}),
   ).map(([name, value]) => ({ name, value }));
 
   const sizeStats = Object.entries(
@@ -39,7 +57,7 @@ export default function Dashboard() {
       if (!c.size) return acc;
       acc[c.size] = (acc[c.size] || 0) + 1;
       return acc;
-    }, {})
+    }, {}),
   ).map(([name, value]) => ({ name, value }));
 
   const countryStats = Object.entries(
@@ -47,16 +65,16 @@ export default function Dashboard() {
       if (!c.country) return acc;
       acc[c.country] = (acc[c.country] || 0) + 1;
       return acc;
-    }, {})
+    }, {}),
   ).map(([name, value]) => ({ name, value }));
 
   // Current tenant company details
-  const current = companies.find(c => c.id === tenant.id) || {};
+  const current = companies.find((c) => c.id === tenant.id) || {};
 
   return (
     <>
       <h2>Dashboard</h2>
-      <div style={{ marginBottom: 16, color: '#888', fontSize: 15 }}>
+      <div style={{ marginBottom: 16, color: "#888", fontSize: 15 }}>
         <b>Tenant:</b> {tenant.name}
       </div>
       {loading ? (
@@ -66,59 +84,92 @@ export default function Dashboard() {
           <section className="kpi-cards">
             <div className="card">
               <h3>Industry</h3>
-              <p>{current.industry || '-'}</p>
+              <p>{current.industry || "-"}</p>
             </div>
             <div className="card">
               <h3>Size</h3>
-              <p>{current.size || '-'}</p>
+              <p>{current.size || "-"}</p>
             </div>
             <div className="card">
               <h3>Country</h3>
-              <p>{current.country || '-'}</p>
+              <p>{current.country || "-"}</p>
             </div>
             <div className="card">
               <h3>Founded</h3>
-              <p>{current.founded_year || '-'}</p>
+              <p>{current.founded_year || "-"}</p>
             </div>
             <div className="card">
               <h3>Website</h3>
-              <p>{current.website ? <a href={current.website} target="_blank" rel="noopener noreferrer">Visit</a> : '-'}</p>
+              <p>
+                {current.website ? (
+                  <a
+                    href={current.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Visit
+                  </a>
+                ) : (
+                  "-"
+                )}
+              </p>
             </div>
           </section>
 
-          <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap', marginBottom: 32 }}>
-            <div style={{ flex: 1, minWidth: 320, height: 320, background: '#fff', borderRadius: 14, boxShadow: '0 2px 12px #5f6fff11', padding: 16 }}>
-              <h3 style={{ textAlign: 'center', color: '#5f6fff' }}>Industry Distribution</h3>
+          <div
+            style={{
+              display: "flex",
+              gap: 32,
+              flexWrap: "wrap",
+              marginBottom: 32,
+            }}
+          >
+            <div className="chart-card">
+              <h3 style={{ textAlign: "center", color: "var(--primary)" }}>
+                Industry Distribution
+              </h3>
               <ResponsiveContainer width="100%" height={220}>
                 <PieChart>
-                  <Pie data={industryStats} dataKey="value" nameKey="name" outerRadius={80} label>
-                    {industryStats.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                  <Pie
+                    data={industryStats}
+                    dataKey="value"
+                    nameKey="name"
+                    outerRadius={80}
+                    label
+                  >
+                    {industryStats.map((_, i) => (
+                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                    ))}
                   </Pie>
                   <Tooltip />
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            <div style={{ flex: 1, minWidth: 320, height: 320, background: '#fff', borderRadius: 14, boxShadow: '0 2px 12px #5f6fff11', padding: 16 }}>
-              <h3 style={{ textAlign: 'center', color: '#27ae60' }}>Company Sizes</h3>
+            <div className="chart-card">
+              <h3 style={{ textAlign: "center", color: "var(--success)" }}>
+                Company Sizes
+              </h3>
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={sizeStats}>
                   <XAxis dataKey="name" />
                   <YAxis allowDecimals={false} />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="value" fill="#27ae60" />
+                  <Bar dataKey="value" fill="var(--success)" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            <div style={{ flex: 1, minWidth: 320, height: 320, background: '#fff', borderRadius: 14, boxShadow: '0 2px 12px #5f6fff11', padding: 16 }}>
-              <h3 style={{ textAlign: 'center', color: '#e67e22' }}>Countries</h3>
+            <div className="chart-card">
+              <h3 style={{ textAlign: "center", color: "var(--warning)" }}>
+                Countries
+              </h3>
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={countryStats}>
                   <XAxis dataKey="name" />
                   <YAxis allowDecimals={false} />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="value" fill="#e67e22" />
+                  <Bar dataKey="value" fill="var(--warning)" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
